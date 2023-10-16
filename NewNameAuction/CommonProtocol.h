@@ -58,7 +58,7 @@ enum en_PROTOCOL_TYPE
 	//		WCHAR NickName[10] // 판매중 닉네임
 	//		INT8 ItsMine // 경매 권한 (0 : 내 경매, 1 : 타인의 경매)
 	//		INT8 Bidder // (0 : 내가 입찰, 1 : 타인이 입찰)
-	//		INT8 Status // 상태 (0 : 경매진행중, 1 : 판매완료, 2 : 판매실패(유찰))  
+	//		INT8 Status // 상태 // 0 : 경매중, 1 : 마감임박, 2 : 판매완료, 3 : 유찰 
 	//		INT32 Price // 최고 입찰가
 	//		INT64 EndTime // 마감시간 (마감시간이 넘었다면 종료임박)
 	//	
@@ -105,6 +105,7 @@ enum en_PROTOCOL_TYPE
 	//		SHORT	Type
 	//
 	//		WCHAR NickName[10] // 판매 닉네임
+	//		INT8 Status // 1 : 판매완료, 2 : 유찰
 	// 
 	//	}
 	//

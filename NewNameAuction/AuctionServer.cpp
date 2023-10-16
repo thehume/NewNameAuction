@@ -38,7 +38,7 @@ AuctionServer::AuctionServer()
 {
 	ShutDownFlag = false;
 	lastTime = 0;
-	maxPlayer = dfMAX_PLAYER;
+	maxPlayer = en_MAX_PLAYER;
 	LastUpdateTime_ms = 0;
 	pNetServer = NULL;
 	hJobEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -57,7 +57,7 @@ AuctionServer::AuctionServer()
 }
 
 
-void AuctionServer::SendPacket_CS_AUCTION_REQ_SALE(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH], INT8 Time, INT32 Price)
+void AuctionServer::SendPacket_CS_AUCTION_REQ_SALE(INT64 SessionID, WCHAR NickName[en_NICKNAME_MAX_LENGTH], INT8 Time, INT32 Price)
 {
 	WORD Type = en_PACKET_REQ_SALE;
 
@@ -66,7 +66,7 @@ void AuctionServer::SendPacket_CS_AUCTION_REQ_SALE(INT64 SessionID, WCHAR NickNa
 	pPacket->addRef(1);
 
 	*pPacket << Type;
-	pPacket->PutData((char*)NickName, dfNICKNAME_MAX_LENGTH *sizeof(WCHAR));
+	pPacket->PutData((char*)NickName, en_NICKNAME_MAX_LENGTH *sizeof(WCHAR));
 	*pPacket << Time;
 	*pPacket << Price;
 
@@ -98,7 +98,7 @@ void AuctionServer::SendPacket_CS_AUCTION_RES_SALE(INT64 SessionID, INT8 Flag)
 }
 
 
-void AuctionServer::SendPacket_CS_AUCTION_REQ_SEARCH(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH])
+void AuctionServer::SendPacket_CS_AUCTION_REQ_SEARCH(INT64 SessionID, WCHAR NickName[en_NICKNAME_MAX_LENGTH])
 {
 	WORD Type = en_PACKET_REQ_SEARCH;
 
@@ -107,7 +107,7 @@ void AuctionServer::SendPacket_CS_AUCTION_REQ_SEARCH(INT64 SessionID, WCHAR Nick
 	pPacket->addRef(1);
 
 	*pPacket << Type;
-	pPacket->PutData((char*)NickName, dfNICKNAME_MAX_LENGTH * sizeof(WCHAR));
+	pPacket->PutData((char*)NickName, en_NICKNAME_MAX_LENGTH * sizeof(WCHAR));
 
 	pNetServer->sendPacket(SessionID, pPacket);
 	if (pPacket->subRef() == 0)
@@ -117,7 +117,7 @@ void AuctionServer::SendPacket_CS_AUCTION_REQ_SEARCH(INT64 SessionID, WCHAR Nick
 }
 
 
-void AuctionServer::SendPacket_CS_AUCTION_RES_SEARCH(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH], INT8 ItsMine, INT8 Bidder, INT8 Status, INT32 Price, INT64 EndTime)
+void AuctionServer::SendPacket_CS_AUCTION_RES_SEARCH(INT64 SessionID, WCHAR NickName[en_NICKNAME_MAX_LENGTH], INT8 ItsMine, INT8 Bidder, INT8 Status, INT32 Price, INT64 EndTime)
 {
 	WORD Type = en_PACKET_RES_SEARCH;
 
@@ -126,7 +126,7 @@ void AuctionServer::SendPacket_CS_AUCTION_RES_SEARCH(INT64 SessionID, WCHAR Nick
 	pPacket->addRef(1);
 
 	*pPacket << Type;
-	pPacket->PutData((char*)NickName, dfNICKNAME_MAX_LENGTH * sizeof(WCHAR));
+	pPacket->PutData((char*)NickName, en_NICKNAME_MAX_LENGTH * sizeof(WCHAR));
 	*pPacket << ItsMine;
 	*pPacket << Bidder;
 	*pPacket << Status;
@@ -141,7 +141,7 @@ void AuctionServer::SendPacket_CS_AUCTION_RES_SEARCH(INT64 SessionID, WCHAR Nick
 }
 
 
-void AuctionServer::SendPacket_CS_AUCTION_REQ_BID(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH], INT32 Price)
+void AuctionServer::SendPacket_CS_AUCTION_REQ_BID(INT64 SessionID, WCHAR NickName[en_NICKNAME_MAX_LENGTH], INT32 Price)
 {
 	WORD Type = en_PACKET_REQ_BID;
 
@@ -150,7 +150,7 @@ void AuctionServer::SendPacket_CS_AUCTION_REQ_BID(INT64 SessionID, WCHAR NickNam
 	pPacket->addRef(1);
 
 	*pPacket << Type;
-	pPacket->PutData((char*)NickName, dfNICKNAME_MAX_LENGTH * sizeof(WCHAR));
+	pPacket->PutData((char*)NickName, en_NICKNAME_MAX_LENGTH * sizeof(WCHAR));
 	*pPacket << Price;
 
 	pNetServer->sendPacket(SessionID, pPacket);
@@ -160,7 +160,7 @@ void AuctionServer::SendPacket_CS_AUCTION_REQ_BID(INT64 SessionID, WCHAR NickNam
 	}
 }
 
-void AuctionServer::SendPacket_CS_AUCTION_RES_BID(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH], INT8 Bidder, INT32 Price)
+void AuctionServer::SendPacket_CS_AUCTION_RES_BID(INT64 SessionID, WCHAR NickName[en_NICKNAME_MAX_LENGTH], INT8 Bidder, INT32 Price)
 {
 	WORD Type = en_PACKET_RES_BID;
 
@@ -169,7 +169,7 @@ void AuctionServer::SendPacket_CS_AUCTION_RES_BID(INT64 SessionID, WCHAR NickNam
 	pPacket->addRef(1);
 
 	*pPacket << Type;
-	pPacket->PutData((char*)NickName, dfNICKNAME_MAX_LENGTH * sizeof(WCHAR));
+	pPacket->PutData((char*)NickName, en_NICKNAME_MAX_LENGTH * sizeof(WCHAR));
 	*pPacket << Bidder;
 	*pPacket << Price;
 
@@ -180,7 +180,7 @@ void AuctionServer::SendPacket_CS_AUCTION_RES_BID(INT64 SessionID, WCHAR NickNam
 	}
 }
 
-void AuctionServer::SendPacket_CS_AUCTION_RES_BID(CSessionSet* SessionSet, WCHAR NickName[dfNICKNAME_MAX_LENGTH], INT8 ItsMine, INT32 Price)
+void AuctionServer::SendPacket_CS_AUCTION_RES_BID(CSessionSet* SessionSet, WCHAR NickName[en_NICKNAME_MAX_LENGTH], INT8 ItsMine, INT32 Price)
 {
 	WORD Type = en_PACKET_RES_BID;
 
@@ -189,7 +189,7 @@ void AuctionServer::SendPacket_CS_AUCTION_RES_BID(CSessionSet* SessionSet, WCHAR
 	pPacket->addRef(1);
 
 	*pPacket << Type;
-	pPacket->PutData((char*)NickName, dfNICKNAME_MAX_LENGTH * sizeof(WCHAR));
+	pPacket->PutData((char*)NickName, en_NICKNAME_MAX_LENGTH * sizeof(WCHAR));
 	*pPacket << ItsMine;
 	*pPacket << Price;
 
@@ -201,7 +201,7 @@ void AuctionServer::SendPacket_CS_AUCTION_RES_BID(CSessionSet* SessionSet, WCHAR
 }
 
 
-void AuctionServer::SendPacket_CS_AUCTION_RES_EXPIRE(CSessionSet* SessionSet, WCHAR NickName[dfNICKNAME_MAX_LENGTH])
+void AuctionServer::SendPacket_CS_AUCTION_RES_EXPIRE(CSessionSet* SessionSet, WCHAR NickName[en_NICKNAME_MAX_LENGTH], INT8 Status)
 {
 	WORD Type = en_PACKET_RES_EXPIRE;
 
@@ -210,7 +210,8 @@ void AuctionServer::SendPacket_CS_AUCTION_RES_EXPIRE(CSessionSet* SessionSet, WC
 	pPacket->addRef(1);
 
 	*pPacket << Type;
-	pPacket->PutData((char*)NickName, dfNICKNAME_MAX_LENGTH * sizeof(WCHAR));
+	pPacket->PutData((char*)NickName, en_NICKNAME_MAX_LENGTH * sizeof(WCHAR));
+	*pPacket << Status;
 
 	pNetServer->sendPacket(SessionSet, pPacket);
 	if (pPacket->subRef() == 0)
@@ -219,7 +220,7 @@ void AuctionServer::SendPacket_CS_AUCTION_RES_EXPIRE(CSessionSet* SessionSet, WC
 	}
 }
 
-void AuctionServer::SendPacket_CS_AUCTION_REQ_CHANGE_NICKNAME(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH])
+void AuctionServer::SendPacket_CS_AUCTION_REQ_CHANGE_NICKNAME(INT64 SessionID, WCHAR NickName[en_NICKNAME_MAX_LENGTH])
 {
 	WORD Type = en_PACKET_REQ_CHANGE_NICKNAME;
 
@@ -228,7 +229,7 @@ void AuctionServer::SendPacket_CS_AUCTION_REQ_CHANGE_NICKNAME(INT64 SessionID, W
 	pPacket->addRef(1);
 
 	*pPacket << Type;
-	pPacket->PutData((char*)NickName, dfNICKNAME_MAX_LENGTH * sizeof(WCHAR));
+	pPacket->PutData((char*)NickName, en_NICKNAME_MAX_LENGTH * sizeof(WCHAR));
 
 	pNetServer->sendPacket(SessionID, pPacket);
 	if (pPacket->subRef() == 0)
@@ -255,7 +256,7 @@ void AuctionServer::SendPacket_CS_AUCTION_RES_CHANGE_NICKNAME(INT64 SessionID, I
 	}
 }
 
-void AuctionServer::SendPacket_SS_AUCTION_RES_PLAYER_INFO(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH], INT64 AccountNo, INT32 Point)
+void AuctionServer::SendPacket_SS_AUCTION_RES_PLAYER_INFO(INT64 SessionID, WCHAR NickName[en_NICKNAME_MAX_LENGTH], INT64 AccountNo, INT32 Point)
 {
 	WORD Type = en_PACKET_RES_PLAYER_INFO;
 
@@ -264,7 +265,7 @@ void AuctionServer::SendPacket_SS_AUCTION_RES_PLAYER_INFO(INT64 SessionID, WCHAR
 	pPacket->addRef(1);
 
 	*pPacket << Type;
-	pPacket->PutData((char*)NickName, dfNICKNAME_MAX_LENGTH * sizeof(WCHAR));
+	pPacket->PutData((char*)NickName, en_NICKNAME_MAX_LENGTH * sizeof(WCHAR));
 	*pPacket << AccountNo;
 	*pPacket << Point;
 
@@ -289,11 +290,11 @@ bool AuctionServer::packetProc_CS_AUCTION_REQ_SALE(st_Player* pPlayer, CPacket* 
 	//	}
 	//
 	//------------------------------------------------------------
-	WCHAR NickName[dfNICKNAME_MAX_LENGTH];
+	WCHAR NickName[en_NICKNAME_MAX_LENGTH];
 	INT8 Time;
 	INT32 Price;
 
-	pPacket->GetData((char*)NickName, sizeof(WCHAR) * dfNICKNAME_MAX_LENGTH);
+	pPacket->GetData((char*)NickName, sizeof(WCHAR) * en_NICKNAME_MAX_LENGTH);
 	*pPacket >> Time >> Price;
 
 	//접속캐릭터의 닉네임인지 확인
@@ -335,9 +336,9 @@ bool AuctionServer::packetProc_CS_AUCTION_REQ_SEARCH(st_Player* pPlayer, CPacket
 	//	}
 	//
 	//------------------------------------------------------------
-	WCHAR NickName[dfNICKNAME_MAX_LENGTH];
+	WCHAR NickName[en_NICKNAME_MAX_LENGTH];
 
-	pPacket->GetData((char*)NickName, sizeof(WCHAR) * dfNICKNAME_MAX_LENGTH);
+	pPacket->GetData((char*)NickName, sizeof(WCHAR) * en_NICKNAME_MAX_LENGTH);
 
 	//닉네임 wstring으로 바꿔서 검색, 전체순회하면서 부분문자열이 일치하는지 확인
 	//일치하는 항목 발견시 send
@@ -416,10 +417,10 @@ bool AuctionServer::packetProc_CS_AUCTION_REQ_BID(st_Player* pPlayer, CPacket* p
 	//	}
 	//
 	//------------------------------------------------------------
-	WCHAR NickName[dfNICKNAME_MAX_LENGTH];
+	WCHAR NickName[en_NICKNAME_MAX_LENGTH];
 	INT32 Price;
 
-	pPacket->GetData((char*)NickName, sizeof(WCHAR) * dfNICKNAME_MAX_LENGTH);
+	pPacket->GetData((char*)NickName, sizeof(WCHAR) * en_NICKNAME_MAX_LENGTH);
 	*pPacket >> Price;
 	//현재 보유 포인트 확인
 	if (pPlayer->Point != Price)
@@ -484,8 +485,8 @@ bool AuctionServer::packetProc_CS_AUCTION_REQ_CHANGE_NICKNAME(st_Player* pPlayer
 	//
 	//------------------------------------------------------------
 
-	WCHAR NickName[dfNICKNAME_MAX_LENGTH];
-	pPacket->GetData((char*)NickName, sizeof(WCHAR) * dfNICKNAME_MAX_LENGTH);
+	WCHAR NickName[en_NICKNAME_MAX_LENGTH];
+	pPacket->GetData((char*)NickName, sizeof(WCHAR) * en_NICKNAME_MAX_LENGTH);
 	
 	auto OwnList_iter = OwnList.find(pPlayer->AccountNo);
 	st_NickNameList& NickNameList = OwnList_iter->second;
@@ -521,17 +522,18 @@ bool AuctionServer::packetProc_SS_AUCTION_RES_PLAYER_INFO(st_Player* pPlayer, CP
 
 	INT64 AccountNo;
 	INT32 Point;
-	WCHAR NickName[dfNICKNAME_MAX_LENGTH];
+	WCHAR NickName[en_NICKNAME_MAX_LENGTH];
 
 	*pPacket >> AccountNo >> Point;
-	pPacket->GetData((char*)NickName, sizeof(WCHAR) * dfNICKNAME_MAX_LENGTH);
+	pPacket->GetData((char*)NickName, sizeof(WCHAR) * en_NICKNAME_MAX_LENGTH);
 
 	auto iter = PlayerList.find(AccountNo);
-	if (iter != PlayerList.end())
-	{
+	if (iter != PlayerList.end()) 
+	{ 
 		auto* pPlayer = iter->second;
 		pPlayer->Point = Point;
-		wcscpy_s(pPlayer->NickName, NickName);
+		wcscpy_s(pPlayer->NickName, NickName);	
+		SendInitPackets(pPlayer);
 	}
 
 	return true;
@@ -599,6 +601,7 @@ DWORD WINAPI AuctionServer::LogicThread(AuctionServer* pAuctionServer)
 				pNewPlayer->sessionID = sessionID;
 				pNewPlayer->lastTime = GetTickCount64();
 				pAuctionServer->PlayerList.insert(make_pair(sessionID, pNewPlayer));
+
 				break;
 			}
 
@@ -791,7 +794,12 @@ DWORD WINAPI AuctionServer::DBAccessThread(AuctionServer* pAuctionServer)
 {
 	WORD version = MAKEWORD(2, 2);
 	WSADATA data;
-	WSAStartup(version, &data);
+	if (WSAStartup(version, &data) != 0)
+	{
+		int ErrorCode = WSAGetLastError();
+		systemLog(L"DB Thread Error", dfLOG_LEVEL_ERROR, L"WSAstartup Error, thread id : %d, Error code : %d", GetCurrentThreadId(), ErrorCode);
+		return false;
+	}
 
 	//DB연결 수립
 	CDBConnector DBConnector(L"127.0.0.1", L"root", L"1234", L"AuctionTest", 3306);
@@ -799,7 +807,7 @@ DWORD WINAPI AuctionServer::DBAccessThread(AuctionServer* pAuctionServer)
 	{
 		WCHAR ErrorMsg[100];
 		wcscpy_s(ErrorMsg, DBConnector.GetLastErrorMsg());
-		systemLog(L"DB Connect Error", dfLOG_LEVEL_ERROR, L"thread id : %d, error : %s", GetCurrentThreadId(), ErrorMsg);
+		systemLog(L"DB Thread Error", dfLOG_LEVEL_ERROR, L"Connect Error, thread id : %d, error : %s", GetCurrentThreadId(), ErrorMsg);
 		CrashDump::Crash();
 	}
 
@@ -815,8 +823,8 @@ DWORD WINAPI AuctionServer::DBAccessThread(AuctionServer* pAuctionServer)
 			INT64 AccountNo = jobItem->AccountNo;
 			INT32 Count = jobItem->Count;
 			uint64_t EndTime = jobItem->EndTime;
-			WCHAR MyNickName[dfNICKNAME_MAX_LENGTH];
-			WCHAR TargetNickName[dfNICKNAME_MAX_LENGTH];
+			WCHAR MyNickName[en_NICKNAME_MAX_LENGTH];
+			WCHAR TargetNickName[en_NICKNAME_MAX_LENGTH];
 			wcscpy_s(MyNickName, jobItem->MyNickName);
 			wcscpy_s(TargetNickName, jobItem->TargetNickName);
 
@@ -878,7 +886,10 @@ DWORD WINAPI AuctionServer::DBAccessThread(AuctionServer* pAuctionServer)
 			case en_JOB_NICKNAME_SOLD: //닉네임 판매완료
 			{
 				DBConnector.sendQuery(L"DELETE FROM cellingtable WHERE NickName = '%s'", MyNickName);
-				DBConnector.sendQuery(L"INSERT INTO soldtable VALUES ('%s', %lld, %lld, %d)", MyNickName, AccountNo, EndTime, Count);
+				if (AccountNo != 0) // 유찰이 아닐시
+				{
+					DBConnector.sendQuery(L"INSERT INTO soldtable VALUES ('%s', %lld, %lld, %d)", MyNickName, AccountNo, EndTime, Count);
+				}
 				break;
 			}
 
@@ -950,8 +961,8 @@ void AuctionServer::Update()
 			//CellList_TimeOrder24 뒤에서부터(시간 오래 지난 순) 순회, 경매 종료된 항목들 삭제
 			auto iter = CellList_TimeOrder24.rbegin();
 			st_AuctionData* Data = *iter;
-			if (Data->Status == en_AUCTION_FIN)
-			{
+			if (Data->Status == en_AUCTION_FIN || Data->Status == en_AUCTION_FIN_FAIL)
+			{ 
 				CellList_TimeOrder24.erase(iter.base());
 			}
 			else
@@ -982,7 +993,7 @@ void AuctionServer::Update()
 		for (auto iter = CellList_PriceOrder.begin(); iter != CellList_PriceOrder.end(); )
 		{
 			st_AuctionData* Data = iter->second;
-			if (Data->Status == en_AUCTION_FIN)
+			if (Data->Status == en_AUCTION_FIN || Data->Status == en_AUCTION_FIN_FAIL)
 			{
 
 				iter = CellList_PriceOrder.erase(iter);
@@ -1011,11 +1022,18 @@ void AuctionServer::Update()
 			st_AuctionData* Data = iter->second;
 			if (Data->EndTime < CurTime_ms)
 			{
-				Data->Status == en_AUCTION_FIN;
+				if (Data->BidderID == 0) // 유찰시
+				{
+					Data->Status = en_AUCTION_FIN_FAIL;
+				}
+				else
+				{
+					Data->Status = en_AUCTION_FIN;
+					FinList.push_front(Data);
+					FinList_UMap.insert(make_pair(iter->first, Data));
+				}
 				iter = ImminentList.erase(iter);
-				FinList.push_front(Data);
-				SendPacket_CS_AUCTION_RES_EXPIRE(&SSet, Data->NickName);
-
+				SendPacket_CS_AUCTION_RES_EXPIRE(&SSet, Data->NickName, Data->Status);
 				//DB스레드로 판매완료 통지
 				st_JobItem_DBCheck* DBCheckJob;
 				DBJobPool.mAlloc(&DBCheckJob);
@@ -1025,7 +1043,11 @@ void AuctionServer::Update()
 				wcscpy_s(DBCheckJob->MyNickName, Data->NickName);
 				JobQueue_DBThread.Enqueue(DBCheckJob);
 				SetEvent(hJobEvent_DBThread);
-
+			
+			}
+			else
+			{
+				iter++;
 			}
 		}
 	}
@@ -1035,6 +1057,90 @@ void AuctionServer::Update()
 }
 
 
+void AuctionServer::SendInitPackets(st_Player* pPlayer) //옥션 입장시 기본 정보들 전송
+{
+	INT64 AccountNo = pPlayer->AccountNo;
+	INT64 SessionID = pPlayer->sessionID;
+	auto iter_OwnList = OwnList.find(AccountNo);
+	if (iter_OwnList != OwnList.end())
+	{
+		st_NickNameList& NickNameList = iter_OwnList->second;
+		for (int i = 0; i < NickNameList.count; i++) //OwnList 순회하면서 슬롯에 대한 경매정보 전달
+		{
+			wstring& wstr = NickNameList.NickNames[i];
+			st_AuctionData* pData = NULL;
+			auto iter_CellList = CellList.find(wstr);
+			if (iter_CellList != CellList.end())
+			{
+				pData = iter_CellList->second;
+			}
+
+			if (pData != NULL)
+			{
+				auto iter_ImminentList = ImminentList.find(wstr);
+				if (iter_ImminentList != ImminentList.end())
+				{
+					pData = iter_ImminentList->second;
+				}
+			}
+
+			if (pData != NULL)
+			{
+				auto iter_FintList = FinList_UMap.find(wstr);
+				if (iter_FintList != FinList_UMap.end())
+				{
+					pData = iter_FintList->second;
+				}
+
+			}
+
+			if (pData == NULL) // 유찰
+			{
+				WCHAR NickName[en_NICKNAME_MAX_LENGTH];
+				wcscpy_s(NickName, wstr.c_str());
+				SendPacket_CS_AUCTION_RES_SEARCH(pPlayer->sessionID, NickName, en_AUCTION_ITSMINE_MINE, 0, en_AUCTION_FIN_FAIL, 0, 0);
+			}
+
+			else
+			{
+				INT8 ItsMine = en_AUCTION_ITSMINE_OTHERS;
+				INT8 Bidder = en_AUCTION_BIDDER_OTHER;
+				INT64 EndTime = 0;
+
+				if (pData->OwnerID == pPlayer->AccountNo) { ItsMine = en_AUCTION_ITSMINE_MINE;}
+				if (pData->BidderID == pPlayer->AccountNo) { Bidder = en_AUCTION_BIDDER_ME; }
+				if (pData->Status == en_AUCTION_SALE) { EndTime = pData->EndTime; }
+				SendPacket_CS_AUCTION_RES_SEARCH(pPlayer->sessionID, pData->NickName, ItsMine, Bidder, pData->Status, pData->Price, EndTime);
+			}
+		}
+	}
+
+	int cnt = 0;
+	for (auto iter = CellList_TimeOrder48.begin(); iter != CellList_TimeOrder48.end() && cnt<200; iter++) //최근 등록 경매정보 전달
+	{
+		INT8 ItsMine = en_AUCTION_ITSMINE_OTHERS;
+		INT8 Bidder = en_AUCTION_BIDDER_OTHER;
+
+		st_AuctionData* pData = *iter;
+		if (pData->OwnerID == pPlayer->AccountNo) { ItsMine = en_AUCTION_ITSMINE_MINE; }
+		if (pData->BidderID == pPlayer->AccountNo) { Bidder = en_AUCTION_BIDDER_ME; }
+		SendPacket_CS_AUCTION_RES_SEARCH(pPlayer->sessionID, pData->NickName, ItsMine, Bidder, pData->Status, pData->Price, pData->EndTime);
+		cnt++;
+	}
+
+	cnt = 0;
+	for (auto iter = FinList.begin(); iter != FinList.end() && cnt < 200; iter++) //최근 낙찰 경매정보 전달
+	{
+		INT8 ItsMine = en_AUCTION_ITSMINE_OTHERS;
+		INT8 Bidder = en_AUCTION_BIDDER_OTHER;
+
+		st_AuctionData* pData = *iter;
+		if (pData->OwnerID == pPlayer->AccountNo) { ItsMine = en_AUCTION_ITSMINE_MINE; }
+		if (pData->BidderID == pPlayer->AccountNo) { Bidder = en_AUCTION_BIDDER_ME; }
+		SendPacket_CS_AUCTION_RES_SEARCH(pPlayer->sessionID, pData->NickName, ItsMine, Bidder, pData->Status, pData->Price, pData->EndTime);
+		cnt++;
+	}	
+}
 
 
 
@@ -1047,7 +1153,7 @@ void AuctionServer::updateJobCount(void)
 	this->Temp_NumOfWFSO = 0;
 }
 
-size_t AuctionServer::getCharacterNum(void) // 캐릭터수
+size_t AuctionServer::getCharacterNum(void)
 {
 	return PlayerList.size();
 }

@@ -2,9 +2,6 @@
 
 using namespace std;
 
-#define dfNICKNAME_MAX_LENGTH 10
-#define dfMAX_PLAYER 10000
-
 
 class AuctionServer
 {
@@ -12,12 +9,54 @@ class AuctionServer
 
 public:
 
+    enum en_Auction_Status
+    {
+        en_AUCTION_SALE = 0,
+        en_AUCTION_IMMINENT = 1,
+        en_AUCTION_FIN = 2,
+        en_AUCTION_FIN_FAIL = 3,
+
+        en_REGISTER_SUCESS = 0,
+        en_REGISTER_FAIL_SOLD = 1,
+        en_REGISTER_FAIL_SERVER_SLOT = 2,
+        en_REGISTER_FAIL_USER_SLOT = 3,
+
+        en_CHANGE_NICKNAME_SUCESS = 0,
+        en_CHANGE_NICKNAME_FAIL = 1,
+
+        en_MAX_SERVER_SLOT = 20000,
+        en_MAX_USER_SLOT = 5,
+
+        en_AUCTION_ITSMINE_MINE = 0,
+        en_AUCTION_ITSMINE_OTHERS = 1,
+
+        en_AUCTION_BIDDER_ME = 0,
+        en_AUCTION_BIDDER_OTHER = 1,
+
+        en_NICKNAME_MAX_LENGTH = 10,
+        en_MAX_PLAYER = 10000,
+    };
+
+    enum en_JobType
+    {
+        en_JOB_ON_CLIENT_JOIN,
+        en_JOB_ON_RECV,
+        en_JOB_ON_CLIENT_LEAVE,
+
+        en_JOB_NICKNAME_CHANGE_CHECK,
+        en_JOB_NICKNAME_CHANGE_ABLE,
+        en_JOB_NICKNAME_REGISTER,
+        en_JOB_NICKNAME_REGISTER_CHECK,
+        en_JOB_NICKNAME_REGISTER_ABLE,
+        en_JOB_NICKNAME_SOLD,
+    };
+
     struct st_Player //접속한 유저 데이터
     {
         BOOL isValid;
         INT64 AccountNo;
         INT64 sessionID;
-        WCHAR NickName[dfNICKNAME_MAX_LENGTH];
+        WCHAR NickName[en_NICKNAME_MAX_LENGTH];
         INT32 Point;
         ULONGLONG lastTime;
     };
@@ -37,78 +76,24 @@ public:
         INT64 SessionID;
         uint64_t EndTime;
         INT32 Count;
-        WCHAR MyNickName[dfNICKNAME_MAX_LENGTH];
-        WCHAR TargetNickName[dfNICKNAME_MAX_LENGTH];
+        WCHAR MyNickName[en_NICKNAME_MAX_LENGTH];
+        WCHAR TargetNickName[en_NICKNAME_MAX_LENGTH];
     };
 
-    struct st_Auction_InitData
+    struct st_Auction_InitData // 임시 보관 데이터
     {
         INT8 Time;
         INT32 Price;
     };
 
-    enum en_Auction_Status
-    {
-        en_AUCTION_SALE = 0,
-        en_AUCTION_IMMINENT = 1,
-        en_AUCTION_FIN = 2
-    };
-
-    enum en_Auction_Register_Status
-    {
-        en_REGISTER_SUCESS = 0,
-        en_REGISTER_FAIL_SOLD = 1,
-        en_REGISTER_FAIL_SERVER_SLOT = 2,
-        en_REGISTER_FAIL_USER_SLOT = 3,
-    };
-
-    enum en_Auction_Change_NickName
-    {
-        en_CHANGE_NICKNAME_SUCESS = 0,
-        en_CHANGE_NICKNAME_FAIL = 1,
-    };
-
-    enum en_Auction_Slot
-    {
-        en_MAX_SERVER_SLOT = 20000,
-        en_MAX_USER_SLOT = 5,
-    };
-
-    enum en_Auction_ItsMine
-    {
-        en_AUCTION_ITSMINE_MINE = 0,
-        en_AUCTION_ITSMINE_OTHERS = 1,
-    };
-
-    enum en_Auction_Bidder
-    {
-        en_AUCTION_BIDDER_ME = 0,
-        en_AUCTION_BIDDER_OTHER = 1,
-    };
-
-    enum en_JobType
-    {
-        en_JOB_ON_CLIENT_JOIN,
-        en_JOB_ON_RECV,
-        en_JOB_ON_CLIENT_LEAVE,
-
-        en_JOB_NICKNAME_CHANGE_CHECK,
-        en_JOB_NICKNAME_CHANGE_ABLE,
-        en_JOB_NICKNAME_REGISTER,
-        en_JOB_NICKNAME_REGISTER_CHECK,
-        en_JOB_NICKNAME_REGISTER_ABLE,
-        en_JOB_NICKNAME_SOLD,
-    };
-
-
     struct st_AuctionData // 경매 데이터
     {
         uint64_t StartTime; //경매 시작 시간
         uint64_t EndTime; //경매 종료 시간
-        INT8 Status; // 0 : 경매중, 1 : 마감임박, 2 : 종료
+        INT8 Status; // 0 : 경매중, 1 : 마감임박, 2 : 판매완료, 3 : 유찰
         INT64 OwnerID; //판매자 회원번호
         INT64 BidderID; //최고가 입찰자 회원번호
-        WCHAR NickName[dfNICKNAME_MAX_LENGTH]; //판매 닉네임
+        WCHAR NickName[en_NICKNAME_MAX_LENGTH]; //판매 닉네임
         INT32 Price; //최고 입찰가
         INT32 Count; //입찰에 참여한 사람 수
     };
@@ -137,18 +122,19 @@ public:
     bool Start();
     bool Stop();
     void Update();
+    void SendInitPackets(st_Player* pPlayer);
 
-    void SendPacket_CS_AUCTION_REQ_SALE(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH], INT8 Time, INT32 Price);
+    void SendPacket_CS_AUCTION_REQ_SALE(INT64 SessionID, WCHAR NickName[en_NICKNAME_MAX_LENGTH], INT8 Time, INT32 Price);
     void SendPacket_CS_AUCTION_RES_SALE(INT64 SessionID, INT8 Flag);
-    void SendPacket_CS_AUCTION_REQ_SEARCH(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH]);
-    void SendPacket_CS_AUCTION_RES_SEARCH(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH], INT8 ItsMine, INT8 Bidder, INT8 Status, INT32 Price, INT64 EndTime);
-    void SendPacket_CS_AUCTION_REQ_BID(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH], INT32 Price);
-    void SendPacket_CS_AUCTION_RES_BID(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH], INT8 Bidder, INT32 Price);
-    void SendPacket_CS_AUCTION_RES_BID(CSessionSet* SessionSet, WCHAR NickName[dfNICKNAME_MAX_LENGTH], INT8 ItsMine, INT32 Price);
-    void SendPacket_CS_AUCTION_RES_EXPIRE(CSessionSet* SessionSet, WCHAR NickName[dfNICKNAME_MAX_LENGTH]);
-    void SendPacket_CS_AUCTION_REQ_CHANGE_NICKNAME(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH]);
+    void SendPacket_CS_AUCTION_REQ_SEARCH(INT64 SessionID, WCHAR NickName[en_NICKNAME_MAX_LENGTH]);
+    void SendPacket_CS_AUCTION_RES_SEARCH(INT64 SessionID, WCHAR NickName[en_NICKNAME_MAX_LENGTH], INT8 ItsMine, INT8 Bidder, INT8 Status, INT32 Price, INT64 EndTime);
+    void SendPacket_CS_AUCTION_REQ_BID(INT64 SessionID, WCHAR NickName[en_NICKNAME_MAX_LENGTH], INT32 Price);
+    void SendPacket_CS_AUCTION_RES_BID(INT64 SessionID, WCHAR NickName[en_NICKNAME_MAX_LENGTH], INT8 Bidder, INT32 Price);
+    void SendPacket_CS_AUCTION_RES_BID(CSessionSet* SessionSet, WCHAR NickName[en_NICKNAME_MAX_LENGTH], INT8 ItsMine, INT32 Price);
+    void SendPacket_CS_AUCTION_RES_EXPIRE(CSessionSet* SessionSet, WCHAR NickName[en_NICKNAME_MAX_LENGTH], INT8 Status);
+    void SendPacket_CS_AUCTION_REQ_CHANGE_NICKNAME(INT64 SessionID, WCHAR NickName[en_NICKNAME_MAX_LENGTH]);
     void SendPacket_CS_AUCTION_RES_CHANGE_NICKNAME(INT64 SessionID, INT8 Status);
-    void SendPacket_SS_AUCTION_RES_PLAYER_INFO(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH], INT64 AccountNo, INT32 Point);
+    void SendPacket_SS_AUCTION_RES_PLAYER_INFO(INT64 SessionID, WCHAR NickName[en_NICKNAME_MAX_LENGTH], INT64 AccountNo, INT32 Point);
 
 
 
@@ -202,6 +188,8 @@ private:
     list<st_AuctionData*> CellList_TimeOrder48; // 시간순서 경매 리스트 48시간 이하
     map<int, st_AuctionData*> CellList_PriceOrder; // 가격순서 경매 리스트 
     list<st_AuctionData*> FinList; // 경매 종료 리스트
+    unordered_map<wstring, st_AuctionData*> FinList_UMap; // 경매 종료 리스트
+
     unordered_map<INT64, st_Auction_InitData> waitingDataList; // 옥션 경매등록 임시데이터
 
     LockFreeQueue<st_JobItem*> JobQueue;
