@@ -37,7 +37,7 @@ public:
         en_MAX_PLAYER = 10000,
     };
 
-    enum en_JobType
+    enum en_JobType //
     {
         en_JOB_ON_CLIENT_JOIN,
         en_JOB_ON_RECV,

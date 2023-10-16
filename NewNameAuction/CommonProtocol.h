@@ -54,7 +54,7 @@ enum en_PROTOCOL_TYPE
 	//		INT8 Bidder // (0 : 내가 입찰, 1 : 타인이 입찰)
 	//		INT8 Status // 상태 // 0 : 경매중, 1 : 마감임박, 2 : 판매완료, 3 : 유찰 
 	//		INT32 Price // 최고 입찰가
-	//		INT64 EndTime // 마감시간 (마감시간이 넘었다면 종료임박)
+	//		INT64 EndTime // 마감시간 (종료임박의 경우 0)
 	//	
 	//	}
 	//
@@ -84,7 +84,7 @@ enum en_PROTOCOL_TYPE
 	//		SHORT	Type
 	//
 	//		WCHAR NickName[10] // 판매 닉네임
-	//		INT8 Bidder // 내 입찰인지 (0 : 내 입찰, 1 : 타인의 입찰)
+	//		INT8 Bidder // 0 : 내 입찰, 1 : 타인의 입찰
 	//		INT32 Price // 입찰 금액
 	//	}
 	//
@@ -142,7 +142,7 @@ enum en_PROTOCOL_TYPE
 	//		SHORT	Type
 	//
 	//		INT64 AccountNo //회원번호
-	//		INT32 Point //닉네임 거래에 사용되는 재화
+	//		INT32 Point //닉네임 거래에 사용되는 재화 보유량(메이플포인트)
 	//		WCHAR NickName[10] // 현재 접속한 캐릭터 닉네임
 	//	}
 	//
