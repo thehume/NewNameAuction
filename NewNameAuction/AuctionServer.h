@@ -2,41 +2,8 @@
 
 using namespace std;
 
-#define NICKNAME_MAX_LENGTH 10
-#define MAX_PLAYER 10000
-
-enum en_JobType
-{
-    en_JOB_ON_CLIENT_JOIN,
-    en_JOB_ON_RECV,
-    en_JOB_ON_CLIENT_LEAVE,
-
-    en_JOB_NICKNAME_CHANGE_CHECK,
-    en_JOB_NICKNAME_CHANGE_ABLE,
-    en_JOB_NICKNAME_REGISTER,
-    en_JOB_NICKNAME_REGISTER_CHECK,
-    en_JOB_NICKNAME_REGISTER_ABLE,
-    en_JOB_NICKNAME_SOLD,
-};
-
-struct st_JobItem
-{
-    INT64 JobType;
-    INT64 SessionID;
-    INT64 AccountNo;
-    CPacket* pPacket;
-};
-
-struct st_JobItem_DBCheck
-{
-    INT64 JobType;
-    INT64 AccountNo;
-    INT64 SessionID;
-    uint64_t EndTime;
-    INT32 Count;
-    WCHAR MyNickName[NICKNAME_MAX_LENGTH];
-    WCHAR TargetNickName[NICKNAME_MAX_LENGTH];
-};
+#define dfNICKNAME_MAX_LENGTH 10
+#define dfMAX_PLAYER 10000
 
 
 class AuctionServer
@@ -50,9 +17,28 @@ public:
         BOOL isValid;
         INT64 AccountNo;
         INT64 sessionID;
-        WCHAR NickName[NICKNAME_MAX_LENGTH];
+        WCHAR NickName[dfNICKNAME_MAX_LENGTH];
         INT32 Point;
         ULONGLONG lastTime;
+    };
+
+    struct st_JobItem
+    {
+        INT64 JobType;
+        INT64 SessionID;
+        INT64 AccountNo;
+        CPacket* pPacket;
+    };
+
+    struct st_JobItem_DBCheck
+    {
+        INT64 JobType;
+        INT64 AccountNo;
+        INT64 SessionID;
+        uint64_t EndTime;
+        INT32 Count;
+        WCHAR MyNickName[dfNICKNAME_MAX_LENGTH];
+        WCHAR TargetNickName[dfNICKNAME_MAX_LENGTH];
     };
 
     struct st_Auction_InitData
@@ -88,26 +74,41 @@ public:
         en_MAX_USER_SLOT = 5,
     };
 
+    enum en_Auction_ItsMine
+    {
+        en_AUCTION_ITSMINE_MINE = 0,
+        en_AUCTION_ITSMINE_OTHERS = 1,
+    };
+
+    enum en_Auction_Bidder
+    {
+        en_AUCTION_BIDDER_ME = 0,
+        en_AUCTION_BIDDER_OTHER = 1,
+    };
+
+    enum en_JobType
+    {
+        en_JOB_ON_CLIENT_JOIN,
+        en_JOB_ON_RECV,
+        en_JOB_ON_CLIENT_LEAVE,
+
+        en_JOB_NICKNAME_CHANGE_CHECK,
+        en_JOB_NICKNAME_CHANGE_ABLE,
+        en_JOB_NICKNAME_REGISTER,
+        en_JOB_NICKNAME_REGISTER_CHECK,
+        en_JOB_NICKNAME_REGISTER_ABLE,
+        en_JOB_NICKNAME_SOLD,
+    };
+
+
     struct st_AuctionData // 경매 데이터
     {
-        enum
-        {
-            en_AUCTION_ITSMINE_MINE = 0,
-            en_AUCTION_ITSMINE_OTHERS = 1,
-        };
-
-        enum
-        {
-            en_AUCTION_BIDDER_ME = 0,
-            en_AUCTION_BIDDER_OTHER = 1,
-        };
-
         uint64_t StartTime; //경매 시작 시간
         uint64_t EndTime; //경매 종료 시간
         INT8 Status; // 0 : 경매중, 1 : 마감임박, 2 : 종료
         INT64 OwnerID; //판매자 회원번호
         INT64 BidderID; //최고가 입찰자 회원번호
-        WCHAR NickName[NICKNAME_MAX_LENGTH]; //판매 닉네임
+        WCHAR NickName[dfNICKNAME_MAX_LENGTH]; //판매 닉네임
         INT32 Price; //최고 입찰가
         INT32 Count; //입찰에 참여한 사람 수
     };
@@ -137,17 +138,17 @@ public:
     bool Stop();
     void Update();
 
-    void CS_AUCTION_REQ_SALE(INT64 SessionID, WCHAR NickName[NICKNAME_MAX_LENGTH], INT8 Time, INT32 Price);
-    void CS_AUCTION_RES_SALE(INT64 SessionID, INT8 Flag);
-    void CS_AUCTION_REQ_SEARCH(INT64 SessionID, WCHAR NickName[NICKNAME_MAX_LENGTH]);
-    void CS_AUCTION_RES_SEARCH(INT64 SessionID, WCHAR NickName[NICKNAME_MAX_LENGTH], INT8 ItsMine, INT8 Bidder, INT8 Status, INT32 Price, INT64 EndTime);
-    void CS_AUCTION_REQ_BID(INT64 SessionID, WCHAR NickName[NICKNAME_MAX_LENGTH], INT32 Price);
-    void CS_AUCTION_RES_BID(INT64 SessionID, WCHAR NickName[NICKNAME_MAX_LENGTH], INT8 Bidder, INT32 Price);
-    void CS_AUCTION_RES_BID(CSessionSet* SessionSet, WCHAR NickName[NICKNAME_MAX_LENGTH], INT8 ItsMine, INT32 Price);
-    void CS_AUCTION_RES_EXPIRE(CSessionSet* SessionSet, WCHAR NickName[NICKNAME_MAX_LENGTH]);
-    void CS_AUCTION_REQ_CHANGE_NICKNAME(INT64 SessionID, WCHAR NickName[NICKNAME_MAX_LENGTH]);
-    void CS_AUCTION_RES_CHANGE_NICKNAME(INT64 SessionID, INT8 Status);
-    void SS_AUCTION_RES_PLAYER_INFO(INT64 SessionID, WCHAR NickName[NICKNAME_MAX_LENGTH], INT64 AccountNo, INT32 Point);
+    void SendPacket_CS_AUCTION_REQ_SALE(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH], INT8 Time, INT32 Price);
+    void SendPacket_CS_AUCTION_RES_SALE(INT64 SessionID, INT8 Flag);
+    void SendPacket_CS_AUCTION_REQ_SEARCH(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH]);
+    void SendPacket_CS_AUCTION_RES_SEARCH(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH], INT8 ItsMine, INT8 Bidder, INT8 Status, INT32 Price, INT64 EndTime);
+    void SendPacket_CS_AUCTION_REQ_BID(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH], INT32 Price);
+    void SendPacket_CS_AUCTION_RES_BID(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH], INT8 Bidder, INT32 Price);
+    void SendPacket_CS_AUCTION_RES_BID(CSessionSet* SessionSet, WCHAR NickName[dfNICKNAME_MAX_LENGTH], INT8 ItsMine, INT32 Price);
+    void SendPacket_CS_AUCTION_RES_EXPIRE(CSessionSet* SessionSet, WCHAR NickName[dfNICKNAME_MAX_LENGTH]);
+    void SendPacket_CS_AUCTION_REQ_CHANGE_NICKNAME(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH]);
+    void SendPacket_CS_AUCTION_RES_CHANGE_NICKNAME(INT64 SessionID, INT8 Status);
+    void SendPacket_SS_AUCTION_RES_PLAYER_INFO(INT64 SessionID, WCHAR NickName[dfNICKNAME_MAX_LENGTH], INT64 AccountNo, INT32 Point);
 
 
 
@@ -203,14 +204,14 @@ private:
     list<st_AuctionData*> FinList; // 경매 종료 리스트
     unordered_map<INT64, st_Auction_InitData> waitingDataList; // 옥션 경매등록 임시데이터
 
-    alignas(64) LockFreeQueue<st_JobItem*> JobQueue;
+    LockFreeQueue<st_JobItem*> JobQueue;
     HANDLE hJobEvent;
-    alignas(64) LockFreeQueue<st_JobItem_DBCheck*> JobQueue_DBThread;
+    LockFreeQueue<st_JobItem_DBCheck*> JobQueue_DBThread;
     HANDLE hJobEvent_DBThread;
-    alignas(64) CMemoryPoolBucket<st_JobItem> JobPool;
-    alignas(64) CMemoryPoolBucket<st_JobItem_DBCheck> DBJobPool;
-    alignas(64) CMemoryPoolBucket<st_Player> PlayerPool;
-    alignas(64) CMemoryPoolBucket<st_AuctionData> AuctionDataPool;
+    CMemoryPoolBucket<st_JobItem> JobPool;
+    CMemoryPoolBucket<st_JobItem_DBCheck> DBJobPool;
+    CMemoryPoolBucket<st_Player> PlayerPool;
+    CMemoryPoolBucket<st_AuctionData> AuctionDataPool;
 };
 
 class CContentsHandler : public CNetServerHandler
