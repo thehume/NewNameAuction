@@ -9,7 +9,7 @@ class AuctionServer
 
 public:
 
-    enum en_Auction_Status
+    enum en_Auction_Status //경매 상태 정보들(패킷 프로토콜과 일치)
     {
         en_AUCTION_SALE = 0,
         en_AUCTION_IMMINENT = 1,
@@ -61,7 +61,7 @@ public:
         ULONGLONG lastTime;
     };
 
-    struct st_JobItem
+    struct st_JobItem // 로직 스레드에 전달될 Job
     {
         INT64 JobType;
         INT64 SessionID;
@@ -69,7 +69,7 @@ public:
         CPacket* pPacket;
     };
 
-    struct st_JobItem_DBCheck
+    struct st_JobItem_DBCheck // DB 접근 스레드에 전달될 Job
     {
         INT64 JobType;
         INT64 AccountNo;
@@ -80,7 +80,7 @@ public:
         WCHAR TargetNickName[en_NICKNAME_MAX_LENGTH];
     };
 
-    struct st_Auction_InitData // 임시 보관 데이터
+    struct st_Auction_InitData // 비동기 처리용 임시 보관 데이터
     {
         INT8 Time;
         INT32 Price;
@@ -93,7 +93,7 @@ public:
         INT8 Status; // 0 : 경매중, 1 : 마감임박, 2 : 판매완료, 3 : 유찰
         INT64 OwnerID; //판매자 회원번호
         INT64 BidderID; //최고가 입찰자 회원번호
-        WCHAR NickName[en_NICKNAME_MAX_LENGTH]; //판매 닉네임
+        WCHAR NickName[en_NICKNAME_MAX_LENGTH]; //판매되는 닉네임
         INT32 Price; //최고 입찰가
         INT32 Count; //입찰에 참여한 사람 수
     };
@@ -122,8 +122,10 @@ public:
     bool Start();
     bool Stop();
     void Update();
-    void SendInitPackets(st_Player* pPlayer);
+    void SendInitPackets(st_Player* pPlayer); //유저 최초 접속시 경매장의 기본 정보들을 전달하는 함수
+    void OwnList_CheckAndInsert(INT64 AccountNo, wstring& wstr); //OwnList에 해당 닉네임이 존재하는지 체크후 존재하지 않으면 삽입하는 함수
 
+    //패킷 만들어 대상에게 보내는 함수들
     void SendPacket_CS_AUCTION_REQ_SALE(INT64 SessionID, WCHAR NickName[en_NICKNAME_MAX_LENGTH], INT8 Time, INT32 Price);
     void SendPacket_CS_AUCTION_RES_SALE(INT64 SessionID, INT8 Flag);
     void SendPacket_CS_AUCTION_REQ_SEARCH(INT64 SessionID, WCHAR NickName[en_NICKNAME_MAX_LENGTH]);
@@ -136,17 +138,16 @@ public:
     void SendPacket_CS_AUCTION_RES_CHANGE_NICKNAME(INT64 SessionID, INT8 Status);
     void SendPacket_SS_AUCTION_RES_PLAYER_INFO(INT64 SessionID, WCHAR NickName[en_NICKNAME_MAX_LENGTH], INT64 AccountNo, INT32 Point);
 
-
-
+    //패킷 수신시 호출되는 프로시저들
     bool packetProc_CS_AUCTION_REQ_SALE(st_Player* pPlayer, CPacket* pPacket, INT64 SessionID);
     bool packetProc_CS_AUCTION_REQ_SEARCH(st_Player* pPlayer, CPacket* pPacket, INT64 SessionID);
     bool packetProc_CS_AUCTION_REQ_BID(st_Player* pPlayer, CPacket* pPacket, INT64 SessionID);
     bool packetProc_CS_AUCTION_REQ_CHANGE_NICKNAME(st_Player* pPlayer, CPacket* pPacket, INT64 SessionID);
     bool packetProc_SS_AUCTION_RES_PLAYER_INFO(st_Player* pPlayer, CPacket* pPacket, INT64 SessionID);
 
-
     bool PacketProc(st_Player* pPlayer, WORD PacketType, CPacket* pPacket, INT64 SessionID);
     
+    //서버 모니터링/디버깅용 정보
     void updateJobCount(void);
     size_t getCharacterNum(void); 
     LONG getJobQueueUseSize(void);

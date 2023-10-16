@@ -341,7 +341,6 @@ bool AuctionServer::packetProc_CS_AUCTION_REQ_SEARCH(st_Player* pPlayer, CPacket
 	pPacket->GetData((char*)NickName, sizeof(WCHAR) * en_NICKNAME_MAX_LENGTH);
 
 	//닉네임 wstring으로 바꿔서 검색, 전체순회하면서 부분문자열이 일치하는지 확인
-	//일치하는 항목 발견시 send
 
 	wstring wstr(NickName);
 	for (auto iter = CellList.begin(); iter != CellList.end(); iter++)
@@ -467,7 +466,7 @@ bool AuctionServer::packetProc_CS_AUCTION_REQ_BID(st_Player* pPlayer, CPacket* p
 		}
 	}
 	SendPacket_CS_AUCTION_RES_BID(&SSet, NickName, en_AUCTION_BIDDER_OTHER, Price);
-
+	OwnList_CheckAndInsert(pPlayer->AccountNo, wstr);
 	return true;
 }
 bool AuctionServer::packetProc_CS_AUCTION_REQ_CHANGE_NICKNAME(st_Player* pPlayer, CPacket* pPacket, INT64 SessionID)
@@ -587,9 +586,9 @@ DWORD WINAPI AuctionServer::LogicThread(AuctionServer* pAuctionServer)
 			CPacket* pPacket = jobItem->pPacket;
 			pAuctionServer->JobPool.mFree(jobItem);
 
-			switch (JobType)
+			switch (JobType) //Job 종류에 따라 처리
 			{
-			case en_JOB_ON_CLIENT_JOIN:
+			case en_JOB_ON_CLIENT_JOIN: //Player Join시
 			{
 				st_Player* pNewPlayer;
 				pAuctionServer->PlayerPool.mAlloc(&pNewPlayer);
@@ -605,7 +604,7 @@ DWORD WINAPI AuctionServer::LogicThread(AuctionServer* pAuctionServer)
 				break;
 			}
 
-			case en_JOB_ON_CLIENT_LEAVE:
+			case en_JOB_ON_CLIENT_LEAVE: //Player Leave시
 			{
 				auto item = pAuctionServer->PlayerList.find(sessionID);
 				if (item != pAuctionServer->PlayerList.end())
@@ -622,7 +621,7 @@ DWORD WINAPI AuctionServer::LogicThread(AuctionServer* pAuctionServer)
 				break;
 			}
 
-			case en_JOB_ON_RECV:
+			case en_JOB_ON_RECV: //패킷수신시
 			{
 				*pPacket >> packetType;
 
@@ -677,7 +676,7 @@ DWORD WINAPI AuctionServer::LogicThread(AuctionServer* pAuctionServer)
 				break;
 			}
 
-			case en_JOB_NICKNAME_CHANGE_ABLE:
+			case en_JOB_NICKNAME_CHANGE_ABLE: //닉네임 변경 후처리
 			{
 				//OwnList에서 경매정보삭제
 				auto OwnList_iter = pAuctionServer->OwnList.find(AccountNo);
@@ -696,7 +695,7 @@ DWORD WINAPI AuctionServer::LogicThread(AuctionServer* pAuctionServer)
 				break;
 			}
 
-			case en_JOB_NICKNAME_REGISTER_ABLE:
+			case en_JOB_NICKNAME_REGISTER_ABLE: //경매 정보 등록
 			{
 				auto OwnList_iter = pAuctionServer->OwnList.find(AccountNo);
 				if (OwnList_iter == pAuctionServer->OwnList.end())
@@ -722,7 +721,6 @@ DWORD WINAPI AuctionServer::LogicThread(AuctionServer* pAuctionServer)
 					break;
 				}
 				
-				//문제없을시 등록
 				auto waitingDataList_iter = pAuctionServer->waitingDataList.find(AccountNo);
 				if (waitingDataList_iter == pAuctionServer->waitingDataList.end()) { break; }
 				INT32 Price = waitingDataList_iter->second.Price;
@@ -817,7 +815,6 @@ DWORD WINAPI AuctionServer::DBAccessThread(AuctionServer* pAuctionServer)
 	{
 		while (pAuctionServer->JobQueue_DBThread.Dequeue(&jobItem) == true)
 		{
-			//JOB Process
 			INT64 JobType = jobItem->JobType;
 			INT64 sessionID = jobItem->SessionID;
 			INT64 AccountNo = jobItem->AccountNo;
@@ -830,7 +827,7 @@ DWORD WINAPI AuctionServer::DBAccessThread(AuctionServer* pAuctionServer)
 
 			pAuctionServer->DBJobPool.mFree(jobItem);
 
-			switch (JobType)
+			switch (JobType) // Job 요청 종류에 따라 처리
 			{
 			case en_JOB_NICKNAME_CHANGE_CHECK: // 내가 변경 가능한 닉네임인지 확인
 			{
@@ -886,7 +883,8 @@ DWORD WINAPI AuctionServer::DBAccessThread(AuctionServer* pAuctionServer)
 			case en_JOB_NICKNAME_SOLD: //닉네임 판매완료
 			{
 				DBConnector.sendQuery(L"DELETE FROM cellingtable WHERE NickName = '%s'", MyNickName);
-				if (AccountNo != 0) // 유찰이 아닐시
+				// 유찰(AccountNo == 0) 낙찰 (AccountNo != 0)
+				if (AccountNo != 0) 
 				{
 					DBConnector.sendQuery(L"INSERT INTO soldtable VALUES ('%s', %lld, %lld, %d)", MyNickName, AccountNo, EndTime, Count);
 				}
@@ -1034,7 +1032,7 @@ void AuctionServer::Update()
 				}
 				iter = ImminentList.erase(iter);
 				SendPacket_CS_AUCTION_RES_EXPIRE(&SSet, Data->NickName, Data->Status);
-				//DB스레드로 판매완료 통지
+				//DB의 판매데이터 이동 비동기 처리
 				st_JobItem_DBCheck* DBCheckJob;
 				DBJobPool.mAlloc(&DBCheckJob);
 				DBCheckJob->JobType = en_JOB_NICKNAME_SOLD;
@@ -1057,7 +1055,7 @@ void AuctionServer::Update()
 }
 
 
-void AuctionServer::SendInitPackets(st_Player* pPlayer) //옥션 입장시 기본 정보들 전송
+void AuctionServer::SendInitPackets(st_Player* pPlayer)
 {
 	INT64 AccountNo = pPlayer->AccountNo;
 	INT64 SessionID = pPlayer->sessionID;
@@ -1094,7 +1092,7 @@ void AuctionServer::SendInitPackets(st_Player* pPlayer) //옥션 입장시 기�
 
 			}
 
-			if (pData == NULL) // 유찰
+			if (pData == NULL) // 유찰된 경우
 			{
 				WCHAR NickName[en_NICKNAME_MAX_LENGTH];
 				wcscpy_s(NickName, wstr.c_str());
@@ -1143,6 +1141,30 @@ void AuctionServer::SendInitPackets(st_Player* pPlayer) //옥션 입장시 기�
 }
 
 
+
+void AuctionServer::OwnList_CheckAndInsert(INT64 AccountNo, wstring& wstr)
+{
+	auto OwnList_iter = OwnList.find(AccountNo);
+	if (OwnList_iter == OwnList.end())
+	{
+		st_NickNameList temp;
+		temp.clear();
+
+		OwnList.insert(make_pair(AccountNo, temp));
+		OwnList_iter = OwnList.find(AccountNo);
+	}
+
+	auto& NickNameList = OwnList_iter->second;
+	for (int i = 0; i < NickNameList.count; i++)
+	{
+		if (NickNameList.NickNames[i] == wstr)
+		{
+			return;
+		}
+	}
+	NickNameList.NickNames.push_back(wstr);
+	NickNameList.count++;
+}
 
 
 void AuctionServer::updateJobCount(void)
@@ -1197,7 +1219,7 @@ void CContentsHandler::OnClientJoin(INT64 SessionID, int JoinFlag)
 	jobItem->pPacket = NULL;
 
 
-	pAuctionServer->JobQueue.Enqueue(jobItem); // 해당 캐릭터 생성요청
+	pAuctionServer->JobQueue.Enqueue(jobItem);
 	SetEvent(pAuctionServer->hJobEvent);
 }
 
@@ -1209,7 +1231,7 @@ void CContentsHandler::OnClientLeave(INT64 SessionID)
 	jobItem->SessionID = SessionID;
 	jobItem->pPacket = NULL;
 
-	pAuctionServer->JobQueue.Enqueue(jobItem); //해당 캐릭터 삭제요청
+	pAuctionServer->JobQueue.Enqueue(jobItem);
 	SetEvent(pAuctionServer->hJobEvent);
 }
 
