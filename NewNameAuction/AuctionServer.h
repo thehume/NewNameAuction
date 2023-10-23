@@ -187,7 +187,7 @@ private:
     unordered_map<INT64, st_NickNameList> OwnList; //개인별 경매슬롯 리스트 (key : 회원번호, data : 경매슬롯정보)
     list<st_AuctionData*> CellList_TimeOrder24; // 시간순서 경매 리스트 24시간 이하
     list<st_AuctionData*> CellList_TimeOrder48; // 시간순서 경매 리스트 48시간 이하
-    map<int, st_AuctionData*> CellList_PriceOrder; // 가격순서 경매 리스트 
+    multimap<int, st_AuctionData*, greater<int>> CellList_PriceOrder; // 가격순서 경매 리스트 
     list<st_AuctionData*> FinList; // 경매 종료 리스트
     unordered_map<wstring, st_AuctionData*> FinList_UMap; // 경매 종료 리스트
 
